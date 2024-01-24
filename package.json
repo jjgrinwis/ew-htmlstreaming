@@ -1,0 +1,38 @@
+{
+  "name": "remove-cpc-defer",
+  "version": "0.0.13",
+  "description": "An Akamai EdgeWorker to remove the defer from CPC script that's being injected by AIC.",
+  "main": "index.js",
+  "config": {
+    "ewid": "82790",
+    "edgerc_section": "gss",
+    "accountswitchkey": "B-M-1YX7F48",
+    "groupId": "93068",
+    "description": "An Akamai EdgeWorker to remove the defer from CPC script that's being injected by AIC."
+  },
+  "scripts": {
+  "build": "npm run build-ts",
+  "build-ts": "tsc && npm run build-bundle-json",
+  "build-bundle-json": "cd built && echo '{\"edgeworker-version\":\"'$npm_package_version'\",\"description\":\"'$npm_package_config_description'\"}' > bundle.json && npm run build-ew-tgz",
+  "build-ew-tgz": "cd built && tar czvf ../dist/'ew_'$npm_package_config_ewid'_'$npm_package_version'.tgz' * && npm run activate-edgeworker",
+  "postinstall": "npm run build",
+  "upload-edgeworker": "akamai edgeworkers --section $npm_package_config_edgerc_section --accountkey $npm_package_config_accountswitchkey upload $npm_package_config_ewid --bundle dist/'ew_'$npm_package_config_ewid'_'$npm_package_version'.tgz'", 
+  "activate-edgeworker": "npm run upload-edgeworker && akamai edgeworkers --section $npm_package_config_edgerc_section --accountkey $npm_package_config_accountswitchkey activate $npm_package_config_ewid staging $npm_package_version",
+  "generate-token": "akamai edgeworkers --section $npm_package_config_edgerc_section --accountkey $npm_package_config_accountswitchkey auth --expiry 600 $npm_package_config_hostname",
+  "request-ewid": "akamai edgeworkers --section $npm_package_config_edgerc_section --accountkey $npm_package_config_accountswitchkey create-id $npm_package_config_groupId -restier 200 $npm_package_name"
+  },
+  "keywords": [
+    "edgeworker",
+    "akamai",
+    "cpc",
+    "defer"
+  ],
+  "author": "jgrinwis@akamai.com",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@types/akamai-edgeworkers": "^1.1.16"
+  }
+}
