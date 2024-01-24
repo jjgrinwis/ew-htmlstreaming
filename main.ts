@@ -8,7 +8,7 @@ import { createResponse } from 'create-response';
 import { httpRequest } from 'http-request';
 
 /*
-some 'unsave' response headers we need to remove. createResponse() will fail if not removed
+some 'unsave' response headers we need to remove. createResponse() will fail if they are not removed.
 https://techdocs.akamai.com/edgeworkers/docs/create-response
 
 There is also some issue with request headers. Removing some connection based headers as call will fail.
@@ -63,7 +63,5 @@ async function originRequest(request: EW.ResponseProviderRequest, originStream: 
     let requestHeaders = request.getHeaders()
     requestHeadersToRemove.forEach(element => delete requestHeaders[element])
     
-    let originResponse = await httpRequest(`${request.scheme}://${request.host}${request.url}`, {method: request.method, headers: requestHeaders, body: originStream})
-   
-    return originResponse
+    return await httpRequest(`${request.scheme}://${request.host}${request.url}`, {method: request.method, headers: requestHeaders, body: originStream})
 }

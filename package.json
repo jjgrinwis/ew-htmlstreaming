@@ -1,6 +1,6 @@
 {
   "name": "remove-cpc-defer",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "An Akamai EdgeWorker to remove the defer from CPC script that's being injected by AIC.",
   "main": "index.js",
   "config": {
