@@ -8,12 +8,14 @@ import { createResponse } from 'create-response';
 import { httpRequest } from 'http-request';
 
 /*
-some 'unsave' headers we need to remove. httpRequest will fail if not removed
-https://techdocs.akamai.com/edgeworkers/docs/http-request#http-sub-requests
-https://github.com/akamai/edgeworkers-examples/blob/master/edgecompute/examples/stream/find-replace-stream/main.js
+some 'unsave' response headers we need to remove. createResponse() will fail if not removed
+https://techdocs.akamai.com/edgeworkers/docs/create-response
+
+There is also some issue with request headers. Removing some connection based headers as call will fail.
 */
-const headersToRemove = ['host','content-length', 'transfer-encoding', 'connection', 'vary', 'keep-alive','Proxy-Authenticate', 'proxy-authorization', 'te', 'trailers', 'upgrade'];
-             
+const responseHeadersToRemove = ['host','content-length', 'transfer-encoding', 'connection', 'vary', 'keep-alive','Proxy-Authenticate', 'proxy-authorization', 'te', 'trailers', 'upgrade'];
+const requestHeadersToRemove = ['host', 'connection', 'upgrade'];
+            
 export async function responseProvider(request: EW.ResponseProviderRequest) {
 
     /*
@@ -43,7 +45,7 @@ export async function responseProvider(request: EW.ResponseProviderRequest) {
     https://techdocs.akamai.com/edgeworkers/docs/create-response
     */
     let responseHeaders = htmlResponse.getHeaders()
-    headersToRemove.forEach(element => delete responseHeaders[element])
+    responseHeadersToRemove.forEach(element => delete responseHeaders[element])
 
     return createResponse(200, responseHeaders, htmlResponse.body.pipeThrough(rewriter));
 }
@@ -58,10 +60,8 @@ async function originRequest(request: EW.ResponseProviderRequest, originStream: 
     We need to cleanup our request header as not all headers are allowed
     https://techdocs.akamai.com/edgeworkers/docs/http-request#http-sub-requests
     */
-
-    
     let requestHeaders = request.getHeaders()
-    headersToRemove.forEach(element => delete requestHeaders[element])
+    requestHeadersToRemove.forEach(element => delete requestHeaders[element])
     
     let originResponse = await httpRequest(`${request.scheme}://${request.host}${request.url}`, {method: request.method, headers: requestHeaders, body: originStream})
    
